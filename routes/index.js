@@ -2,6 +2,33 @@ var express = require("express");
 var router = express.Router();
 var User = require("../models/user.js");
 
+// GET /login
+router.get("/login", (req, res, next) => {
+  res.render("login", { title: "Login site" });
+});
+
+// POST / login
+router.post("/login", (req, res, next) => {
+  if (req.body.email && req.body.password) {
+    User.authenticate(req.body.email, req.body.password, (err, user) => {
+      
+
+      if (err || !user) {
+        var err = new Error("Wrong email or password");
+        err.status = 401;
+        return next(err);
+      } else {
+        req.session.userID = User._id;
+        res.redirect("/profile");
+      }
+    });
+  } else {
+    var err = new Error("Email and password are required!");
+    err.status = 401; // 401 is unauthozied sections
+    return next(err);
+  }
+});
+
 // GET / register
 
 router.get("/register", (req, res, next) => {
@@ -11,8 +38,6 @@ router.get("/register", (req, res, next) => {
 // POST / register
 
 router.post("/register", (req, res, next) => {
-  
-
   if (
     req.body.email &&
     req.body.favoriteBook &&
@@ -36,8 +61,6 @@ router.post("/register", (req, res, next) => {
       if (error) {
         return next(error);
       } else {
-        console.log("user: ", user);
-
         return res.redirect("/profile");
       }
     });

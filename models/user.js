@@ -24,7 +24,34 @@ var UserSchema = new mongoose.Schema({
   }
 });
 
-//Adding HASH before saving to data
+// authenticate the credentials against database documents
+// Create the OWN method called authenticate
+UserSchema.statics.authenticate = (email, password, callback)=>{
+  User.findOne({ email: email }).exec((err, user) => {
+    if (err) {
+      return callback(err);
+    } else if (!user) {
+      var err = new Error("User not found.");
+      err.status = 401;
+      callback(err);
+    }
+
+    bcrypt.compare(password, user.password, (err, result) => {
+      if (result === true) {
+        return callback(null, result);
+      } else {
+        return callback();
+      }
+    }
+  
+    
+  );
+  });
+};
+
+
+
+
 // hash password before saving to database
 UserSchema.pre("save", function(next) {
   var user = this; // refer to the UserSchema instance
@@ -39,5 +66,5 @@ UserSchema.pre("save", function(next) {
 });
 
 // Export that models
-var User = mongoose.model("user", UserSchema);
+var User = mongoose.model("User", UserSchema);
 module.exports = User;
