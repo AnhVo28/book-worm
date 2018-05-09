@@ -3,24 +3,28 @@ var bodyParser = require("body-parser");
 var app = express();
 var mongoose = require("mongoose");
 var session = require("express-session");
+var mongoStore = require("connect-mongo")(session);
 
-// use sessions for tracking logins
-app.use(
-  session({
-    secret: "AnhVo loves you",
-    resave: true,
-    saveUninitialized: false
-  })
-);
 
 // Mongoose connection
-
 mongoose.connect(
   "mongodb://prettyboy811:hoanganh@ds119350.mlab.com:19350/bookworm"
 );
 var db = mongoose.connection;
 
 db.on("error", console.error.bind(console, "connection error haha:"));
+
+// use sessions for tracking logins
+app.use(
+  session({
+    secret: "AnhVo loves you",
+    resave: true,
+    saveUninitialized: false,
+    store: new mongoStore({
+      mongooseConnection: db
+    })
+  })
+);
 
 // Make userID available in all browser and pass them to pug file to customize the browser
 app.use((req, res, next) => {
