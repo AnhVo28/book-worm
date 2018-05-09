@@ -1,10 +1,12 @@
 var express = require("express");
 var router = express.Router();
 var User = require("../models/user.js");
+var mid = require("../middleware");
 
 // GET /logout
 router.get("/logout", (req, res, next) => {
   if (req.session) {
+    // delete session object
     req.session.destroy(err => {
       if (err) {
         return next(err);
@@ -16,11 +18,7 @@ router.get("/logout", (req, res, next) => {
 });
 
 // GET /profile
-router.get("/profile", (req, res, next) => {
-  if (!req.session.userID) {
-    var err = new Error("You are not authorized in this page.");
-    return next(err);
-  }
+router.get("/profile", mid.requiresLogIn , (req, res, next) => {
   User.findById(req.session.userID).exec((err, user) => {
     if (err) {
       return next(err);
@@ -35,12 +33,12 @@ router.get("/profile", (req, res, next) => {
 });
 
 // GET /login
-router.get("/login", (req, res, next) => {
+router.get("/login", mid.logOut, (req, res, next) => {
   res.render("login", { title: "Login site" });
 });
 
 // POST / login
-router.post("/login", (req, res, next) => {
+router.post("/login",  (req, res, next) => {
   if (req.body.email && req.body.password) {
     User.authenticate(req.body.email, req.body.password, (err, user) => {
       if (err || !user) {
@@ -61,7 +59,7 @@ router.post("/login", (req, res, next) => {
 
 // GET / register
 
-router.get("/register", (req, res, next) => {
+router.get("/register", mid.logOut,  (req, res, next) => {
   return res.render("register", { title: "Sign up" });
 });
 
@@ -107,7 +105,7 @@ router.get("/", function(req, res, next) {
 });
 
 // GET /about
-router.get("/about", function(req, res, next) {
+router.get("/about", mid.requiresLogIn, function(req, res, next) {
   return res.render("about", { title: "About" });
 });
 
