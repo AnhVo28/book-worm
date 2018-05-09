@@ -26,7 +26,7 @@ var UserSchema = new mongoose.Schema({
 
 // authenticate the credentials against database documents
 // Create the OWN method called authenticate
-UserSchema.statics.authenticate = (email, password, callback)=>{
+UserSchema.statics.authenticate = (email, password, callback) => {
   User.findOne({ email: email }).exec((err, user) => {
     if (err) {
       return callback(err);
@@ -38,19 +38,13 @@ UserSchema.statics.authenticate = (email, password, callback)=>{
 
     bcrypt.compare(password, user.password, (err, result) => {
       if (result === true) {
-        return callback(null, result);
+        return callback(null, user);
       } else {
         return callback();
       }
-    }
-  
-    
-  );
+    });
   });
 };
-
-
-
 
 // hash password before saving to database
 UserSchema.pre("save", function(next) {
