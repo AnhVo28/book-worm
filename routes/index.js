@@ -2,12 +2,24 @@ var express = require("express");
 var router = express.Router();
 var User = require("../models/user.js");
 
+// GET /logout
+router.get("/logout", (req, res, next) => {
+  if (req.session) {
+    req.session.destroy(err => {
+      if (err) {
+        return next(err);
+      } else {
+        return res.redirect("/");
+      }
+    });
+  }
+});
+
 // GET /profile
 router.get("/profile", (req, res, next) => {
-  
   if (!req.session.userID) {
     var err = new Error("You are not authorized in this page.");
-    next(err);
+    return next(err);
   }
   User.findById(req.session.userID).exec((err, user) => {
     if (err) {

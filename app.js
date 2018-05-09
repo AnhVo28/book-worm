@@ -16,10 +16,18 @@ app.use(
 // Mongoose connection
 
 mongoose.connect(
-  "mongodb://prettyboy811:hoanganh@ds119350.mlab.com:19350/bookworm");
+  "mongodb://prettyboy811:hoanganh@ds119350.mlab.com:19350/bookworm"
+);
 var db = mongoose.connection;
 
 db.on("error", console.error.bind(console, "connection error haha:"));
+
+// Make userID available in all browser and pass them to pug file to customize the browser
+app.use((req, res, next) => {
+  res.locals.currentUser = req.session.userID;
+
+  next();
+});
 
 // parse incoming requests
 app.use(bodyParser.json());
